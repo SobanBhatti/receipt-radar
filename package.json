@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "generate:api": "openapi-generator-cli generate -g typescript-axios -i http://localhost:5099/swagger/v1/swagger.json -o ./app/generated/api --additional-properties=npmName=@receiptradar/api,npmVersion=1.0.0,supportsES6=true,withInterfaces=true"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@types/react": "~18.2.79",
+    "@openapitools/openapi-generator-cli": "^2.15.0",
     "typescript": "~5.3.3"
   },
   "private": true

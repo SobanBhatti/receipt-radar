@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { Text, Card, Button, Divider, List } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,12 +8,16 @@ import { useUserStore } from '../store/useUserStore';
 import { useReceiptStore } from '../store/useReceiptStore';
 import { useShoppingListStore } from '../store/useShoppingListStore';
 import { calculateSpendingSummary, formatCurrency } from '../utils/analytics';
+import { userApi } from '../services/apiService';
+import { API_CONFIG } from '../lib/apiConfig';
 
 export default function ProfileScreen() {
   const navigation = useNavigation<any>();
   const { user, logout } = useUserStore();
   const { receipts } = useReceiptStore();
   const { lists } = useShoppingListStore();
+  const [apiTesting, setApiTesting] = useState(false);
+  const [apiStatus, setApiStatus] = useState<string | null>(null);
 
   const summary = useMemo(() => calculateSpendingSummary(receipts), [receipts]);
 
@@ -36,6 +40,23 @@ export default function ProfileScreen() {
         },
       ]
     );
+  };
+
+  const handleTestApi = async () => {
+    setApiTesting(true);
+    setApiStatus(null);
+    try {
+      const response = await userApi.apiUserPingGet();
+      const data = response.data as { message: string; timestamp: string };
+      setApiStatus(`✅ Success: ${data.message}\nTimestamp: ${data.timestamp}`);
+      Alert.alert('API Test Success', `Message: ${data.message}\nTimestamp: ${data.timestamp}`);
+    } catch (error: any) {
+      const errorMessage = error.message || 'Unknown error';
+      setApiStatus(`❌ Error: ${errorMessage}`);
+      Alert.alert('API Test Failed', errorMessage);
+    } finally {
+      setApiTesting(false);
+    }
   };
 
   const stats = [
@@ -156,6 +177,36 @@ export default function ProfileScreen() {
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => navigation.navigate('Shopping')}
             />
+          </Card.Content>
+        </Card>
+
+        {/* API Test Section */}
+        <Card style={styles.sectionCard}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              API Connection Test
+            </Text>
+            <Divider style={styles.divider} />
+            <Text variant="bodySmall" style={styles.apiUrl}>
+              API URL: {API_CONFIG.baseUrl}
+            </Text>
+            {apiStatus && (
+              <Text variant="bodySmall" style={styles.apiStatus}>
+                {apiStatus}
+              </Text>
+            )}
+            <Button
+              mode="outlined"
+              onPress={handleTestApi}
+              disabled={apiTesting}
+              style={styles.testButton}
+              icon="api"
+            >
+              {apiTesting ? 'Testing...' : 'Test API Connection'}
+            </Button>
+            {apiTesting && (
+              <ActivityIndicator size="small" color={theme.colors.primary} style={styles.loader} />
+            )}
           </Card.Content>
         </Card>
 
@@ -302,5 +353,21 @@ const styles = StyleSheet.create({
     color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     marginBottom: 4,
+  },
+  apiUrl: {
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 8,
+    fontFamily: 'monospace',
+  },
+  apiStatus: {
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 8,
+    fontFamily: 'monospace',
+  },
+  testButton: {
+    marginTop: 8,
+  },
+  loader: {
+    marginTop: 8,
   },
 });
