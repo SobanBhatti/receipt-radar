@@ -1,4 +1,4 @@
-package com.receiptradar.app
+package com.sobali.receiptradar
 
 import android.os.Build
 import android.os.Bundle

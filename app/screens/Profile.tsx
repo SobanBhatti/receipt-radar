@@ -54,7 +54,7 @@ export default function ProfileScreen() {
     {
       label: 'This Year',
       value: formatCurrency(summary.thisYear),
-      icon: 'calendar-year',
+      icon: 'calendar-month',
       color: theme.colors.tertiary,
     },
     {

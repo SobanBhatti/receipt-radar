@@ -109,9 +109,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.receiptradar.app'
+    namespace 'com.sobali.receiptradar'
     defaultConfig {
-        applicationId 'com.receiptradar.app'
+        applicationId 'com.sobali.receiptradar'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

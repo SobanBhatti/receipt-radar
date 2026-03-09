@@ -1,4 +1,4 @@
-package com.receiptradar.app
+package com.sobali.receiptradar
 
 import android.app.Application
 import android.content.res.Configuration
