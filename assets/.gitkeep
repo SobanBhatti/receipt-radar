@@ -1,0 +1,5 @@
+# This file ensures the assets directory is tracked by git
+# Add your app icon and splash screen images here:
+# - icon.png (1024x1024px)
+# - adaptive-icon.png (1024x1024px, transparent background)
+# - splash.png (1242x2436px or any size)

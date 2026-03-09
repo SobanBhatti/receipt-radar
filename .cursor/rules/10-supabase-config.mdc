@@ -1,0 +1,75 @@
+---
+alwaysApply: false
+description: Backend configuration (future - likely .NET API + PostgreSQL)
+---
+
+# Backend Configuration (Future)
+
+**Note**: Backend architecture is not yet finalized. This file contains reference information for future backend implementation. Current focus is frontend-only development.
+
+## Planned Backend Stack
+
+- **.NET API** (likely choice)
+- **PostgreSQL** database
+- Authentication service (TBD)
+- Cloud storage for receipt images (TBD)
+
+## Database Configuration (Reference)
+
+### PostgreSQL Setup
+
+**Security Considerations**:
+- `receipts`: Users can only access their own receipts (API-level authorization)
+- `receipt_items`: Users can only access items from their receipts
+- `shopping_lists`: Users can only access their own lists
+- `shopping_list_items`: Users can only access items from their lists
+- `price_observations`: Public read (anonymized), users can insert their own
+
+**Authorization**: Implement at API level (.NET API) rather than database RLS
+
+## Cloud Storage (Future)
+
+### Receipt Images
+- **Purpose**: Store receipt images
+- **Access**: Private (authenticated users only)
+- **Path Pattern**: `{user_id}/{receipt_id}.jpg` or similar
+- **Provider**: TBD (Azure Blob Storage, AWS S3, etc.)
+
+## Database Functions/Triggers
+
+### Auto-create Price Observations
+Create a database trigger or API endpoint that automatically creates `price_observations` when `receipt_items` are inserted.
+
+### Update Materialized View
+Create a scheduled job (via .NET background service or database cron) to refresh `product_prices_latest` materialized view periodically.
+
+## API Endpoints (Planned)
+
+### Authentication
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `POST /api/auth/refresh`
+
+### Receipts
+- `GET /api/receipts` - List user's receipts
+- `GET /api/receipts/{id}` - Get receipt details
+- `POST /api/receipts` - Upload new receipt
+- `DELETE /api/receipts/{id}` - Delete receipt
+
+### Shopping Lists
+- `GET /api/shopping-lists` - List user's shopping lists
+- `POST /api/shopping-lists` - Create shopping list
+- `GET /api/shopping-lists/{id}` - Get shopping list details
+- `POST /api/shopping-lists/{id}/optimize` - Price optimization
+
+### Products & Prices
+- `GET /api/products/search?q={query}` - Search products
+- `GET /api/prices/latest?productIds={ids}` - Get latest prices
+
+## Environment Variables (Future)
+
+Required environment variables for mobile app:
+- `EXPO_PUBLIC_API_URL` - Backend API base URL
+- `EXPO_PUBLIC_API_KEY` - API key (if needed)
+
+Store in `.env` file (not committed to git).

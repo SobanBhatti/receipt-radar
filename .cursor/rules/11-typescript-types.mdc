@@ -1,0 +1,135 @@
+---
+globs: *.ts,*.tsx
+description: TypeScript type definitions and interfaces
+---
+
+# TypeScript Type Definitions
+
+## Core Types
+
+### ParsedReceipt
+```typescript
+interface ParsedReceipt {
+  store: string
+  date: Date
+  items: ParsedReceiptItem[]
+  total: number
+}
+
+interface ParsedReceiptItem {
+  name_raw: string
+  price: number
+  quantity: number
+}
+```
+
+### Database Types (Supabase)
+
+```typescript
+// Users
+interface User {
+  id: string
+  email: string
+  created_at: string
+}
+
+// Receipts
+interface Receipt {
+  id: string
+  user_id: string
+  store_name: string
+  store_chain: string
+  purchase_date: string
+  total_amount: number
+  receipt_image_url: string
+  created_at: string
+}
+
+// Receipt Items
+interface ReceiptItem {
+  id: string
+  receipt_id: string
+  product_name_raw: string
+  normalized_product_id: string | null
+  price: number
+  quantity: number
+  unit_price: number
+  created_at: string
+}
+
+// Products
+interface Product {
+  id: string
+  name: string
+  category: string
+}
+
+// Price Observations
+interface PriceObservation {
+  id: string
+  product_id: string
+  store_chain: string
+  store_name: string
+  price: number
+  timestamp: string
+  receipt_id: string
+}
+
+// Shopping Lists
+interface ShoppingList {
+  id: string
+  user_id: string
+  name: string
+  created_at: string
+}
+
+interface ShoppingListItem {
+  id: string
+  list_id: string
+  product_id: string
+  quantity: number
+}
+```
+
+### Service Types
+
+```typescript
+// Price Optimizer Result
+interface PriceComparisonResult {
+  option1: {
+    stores: string[]
+    total: number
+  }
+  option2: {
+    stores: string[]
+    total: number
+  }
+}
+
+// Analytics Types
+interface MonthlySpending {
+  month: string
+  total: number
+}
+
+interface StoreSpending {
+  store_chain: string
+  total: number
+}
+```
+
+## Type Location
+
+All types should be defined in `/types` directory:
+- `types/receipt.ts` - Receipt-related types
+- `types/product.ts` - Product-related types
+- `types/shopping.ts` - Shopping list types
+- `types/analytics.ts` - Analytics types
+- `types/index.ts` - Re-export all types
+
+## Type Safety Rules
+
+- **Never use `any`**: Use `unknown` if type is truly unknown
+- **Use interfaces**: Prefer interfaces over type aliases for object shapes
+- **Strict null checks**: Handle nullable fields explicitly
+- **Generic types**: Use generics for reusable components/services

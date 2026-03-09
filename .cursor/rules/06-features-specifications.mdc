@@ -1,0 +1,105 @@
+---
+alwaysApply: true
+description: Feature specifications and requirements
+---
+
+# Feature Specifications
+
+**Note**: Current implementation focuses on frontend UI/UX with local state management. Backend integration (API calls, database persistence) will be added in future phases.
+
+## Authentication (Deferred)
+
+**Current Implementation**:
+- Simple dummy login page/screen
+- No real authentication logic
+- App proceeds directly to main screens (no auth check)
+- Authentication system will be implemented later (method TBD)
+
+**Future Implementation** (TBD):
+- Authentication method not yet decided
+- Options may include: Email login, OAuth providers, etc.
+- Will be implemented when backend is ready
+- For now, app works without authentication
+
+## Receipt Upload Flow
+
+**Current Implementation**:
+1. User selects camera or gallery
+2. Image is stored locally (or mock storage)
+3. OCR processing runs (via `ocrService` - mock implementation)
+4. Receipt items are parsed
+5. Receipt and items are saved to local state (Zustand)
+6. UI displays receipt in history
+
+**Future Implementation** (when backend is ready):
+1. User selects camera or gallery
+2. Image is uploaded to cloud storage
+3. OCR processing runs (via `ocrService`)
+4. Receipt items are parsed
+5. Receipt and items are saved to database via API
+6. Price observations are automatically created (anonymized)
+
+## Receipt History
+
+**Receipts Screen** displays:
+- Receipt list (chronological)
+- Store name
+- Purchase date
+- Total price
+
+**Receipt Detail Screen** displays:
+- Store name
+- Purchase date
+- Items list with prices
+- Total amount
+
+## Spending Analytics
+
+**Metrics**:
+- Monthly spending (calculated from local receipts)
+- Spending per store chain (calculated from local receipts)
+- Top purchased products (calculated from local receipts)
+
+**Charts**:
+- Spending per month (line/bar chart)
+- Spending per store (pie/bar chart)
+- Top items purchased (bar chart)
+
+**Current**: Analytics calculated from local state (Zustand)
+**Future**: Analytics calculated from database queries via API
+
+## Shopping List
+
+**Features**:
+- Create new shopping lists
+- Add items to lists (search products)
+- View list details
+- Mark items as purchased (future)
+
+**Product Search**: Search local product list (mock data for now)
+**Future**: Search normalized products table via API
+
+## Price Optimization
+
+**Trigger**: User presses "Find cheapest store" button
+
+**Current Implementation**:
+- Uses mock price data
+- Calculates optimization from local test data
+- Shows UI with example results
+
+**Future Implementation** (when backend is ready):
+1. Get all items from current shopping list
+2. Query `product_prices_latest` for each product via API
+3. Calculate total cost per store combination
+4. Return cheapest single store option
+5. Return cheapest multi-store option
+
+**Display**: Show both options with store names and total prices
+
+## Home Dashboard
+
+**Displays**:
+- This month's spending (total)
+- Latest receipts (last 5-10 receipts)
+- Quick upload receipt button (prominent)

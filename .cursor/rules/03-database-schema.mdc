@@ -1,0 +1,123 @@
+---
+alwaysApply: true
+description: ReceiptRadar database schema and data models
+---
+
+# Database Schema (Planned/Future)
+
+**Note**: This schema represents the planned database structure for future backend integration. The mobile app currently uses local state management and mock data.
+
+## Core Tables
+
+### users
+```sql
+id: uuid (primary key)
+email: text (unique)
+created_at: timestamp
+```
+
+### receipts
+```sql
+id: uuid (primary key)
+user_id: uuid (foreign key -> users.id)
+store_name: text
+store_chain: text
+purchase_date: date
+total_amount: decimal
+receipt_image_url: text (Cloud storage URL - TBD)
+created_at: timestamp
+```
+
+### receipt_items
+```sql
+id: uuid (primary key)
+receipt_id: uuid (foreign key -> receipts.id)
+product_name_raw: text
+normalized_product_id: uuid (foreign key -> products.id, nullable)
+price: decimal
+quantity: decimal
+unit_price: decimal
+created_at: timestamp
+```
+
+### products
+```sql
+id: uuid (primary key)
+name: text (normalized product name)
+category: text
+```
+
+### product_aliases
+```sql
+id: uuid (primary key)
+alias_name: text (raw product name variations)
+product_id: uuid (foreign key -> products.id)
+```
+
+**Example**: Aliases like "NORSK AGURK", "AGURK STK" map to normalized product "Agurk"
+
+### stores
+```sql
+id: uuid (primary key)
+name: text
+chain: text
+location: text (optional)
+```
+
+**Store Chains**: Kiwi, Rema 1000, Coop Extra, Coop Prix, Coop Mega, Meny, Spar
+
+### price_observations
+```sql
+id: uuid (primary key)
+product_id: uuid (foreign key -> products.id)
+store_chain: text
+store_name: text
+price: decimal
+timestamp: timestamp
+receipt_id: uuid (foreign key -> receipts.id)
+```
+
+**Privacy**: Price observations are anonymized - user_id is NOT exposed in public queries.
+
+### shopping_lists
+```sql
+id: uuid (primary key)
+user_id: uuid (foreign key -> users.id)
+name: text
+created_at: timestamp
+```
+
+### shopping_list_items
+```sql
+id: uuid (primary key)
+list_id: uuid (foreign key -> shopping_lists.id)
+product_id: uuid (foreign key -> products.id)
+quantity: decimal
+```
+
+## Materialized Views
+
+### product_prices_latest
+```sql
+product_id: uuid
+store_chain: text
+median_price: decimal
+last_updated: timestamp
+observation_count: integer
+```
+
+**Calculation Logic**:
+- Median price from last 30 days
+- Filter out price outliers
+- Grouped by product_id and store_chain
+
+## Seed Data
+
+Example products to seed:
+- Agurk
+- Melk
+- Egg
+- Brød
+- Tomat
+- Paprika
+- Kyllingfilet

@@ -1,0 +1,87 @@
+---
+alwaysApply: true
+description: Development guidelines and best practices
+---
+
+# Development Guidelines
+
+## Project State Tracking
+
+**CRITICAL**: Always check `00-project-state.mdc` at the start of each session to understand:
+- Current progress and completed chunks
+- What's in progress
+- Key implementation decisions
+- Next steps
+
+**Update `00-project-state.mdc` when**:
+- Completing a chunk or major milestone
+- Making significant architectural decisions
+- Adding new dependencies
+- Changing implementation approach
+
+This ensures context is preserved across chat sessions.
+
+## TypeScript
+
+- **Strict mode**: Enable strict TypeScript checking
+- **Type definitions**: All data structures should have TypeScript types
+- **Interfaces**: Use interfaces for service contracts and data models
+- **No `any`**: Avoid `any` type, use `unknown` if necessary
+
+## Authentication
+
+- **Current**: Simple dummy login page - no real authentication logic
+- **Navigation**: App proceeds directly to main screens without auth checks
+- **Future**: Authentication system will be implemented later (method TBD)
+- **No Auth Guards**: Don't implement auth guards or protected routes yet
+
+## State Management
+
+- **Zustand**: Use for client-side state (UI state, form state, local data)
+- **React Query**: Reserved for future server state (API data, caching, refetching) when backend is ready
+- **Avoid prop drilling**: Use stores/hooks for shared state
+- **Current**: All data stored in Zustand stores (local state)
+- **Future**: React Query will handle server state when API is integrated
+
+## API Patterns (Future)
+
+- **API Client**: Will use API client from `lib/api.ts` (to be created)
+- **Error Handling**: Wrap API calls in try/catch
+- **Type Safety**: Type all API requests and responses
+- **Pagination**: Implement pagination for large lists
+- **Current**: Services use mock data and local state
+
+## Code Organization
+
+- **Single Responsibility**: Each function/component should do one thing
+- **DRY**: Don't repeat yourself - extract common logic
+- **Separation of Concerns**: Keep UI, business logic, and data access separate
+- **Service Layer**: Business logic goes in services, not components
+
+## Testing Considerations
+
+- Services should be testable (pure functions preferred)
+- Mock OCR service for development/testing
+- Current services use mock data (perfect for testing)
+- Future: Use React Query's mock capabilities for API testing when backend is ready
+
+## Performance
+
+- **Image Optimization**: Compress receipt images (for future upload or local storage)
+- **Lazy Loading**: Load receipt images on demand
+- **Caching**: Use Zustand for local data caching; React Query caching reserved for future API data
+- **Debouncing**: Debounce search inputs
+
+## Error Handling
+
+- **User-Friendly Messages**: Show clear error messages
+- **Logging**: Log errors for debugging (use console.error in dev)
+- **Graceful Degradation**: Handle missing data gracefully
+- **Retry Logic**: Implement retry for network failures
+
+## Code Style
+
+- **Consistent Naming**: Use camelCase for variables/functions, PascalCase for components
+- **File Naming**: Match component name to file name
+- **Comments**: Comment complex logic, not obvious code
+- **Formatting**: Use Prettier/ESLint (if configured)

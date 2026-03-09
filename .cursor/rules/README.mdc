@@ -1,0 +1,69 @@
+---
+alwaysApply: false
+description: Index of all Cursor rules for ReceiptRadar project
+---
+
+# ReceiptRadar Cursor Rules Index
+
+This directory contains comprehensive rules and guidelines for developing the ReceiptRadar mobile application.
+
+**Current Focus**: Frontend mobile app development with local state management. Backend integration (likely .NET API + PostgreSQL) will be implemented in future phases.
+
+## Rule Files
+
+0. **00-project-state.mdc** - **CURRENT PROJECT STATE** - Tracks progress, completed chunks, implementation status (ALWAYS CHECK THIS FIRST)
+1. **01-project-overview.mdc** - Project overview, architecture principles, and development phases (frontend-first)
+2. **02-tech-stack.mdc** - Complete tech stack (frontend-focused, backend TBD)
+3. **03-database-schema.mdc** - Planned database schema for future backend
+4. **04-folder-structure.mdc** - Project folder organization and file structure
+5. **05-service-layer.mdc** - Service layer patterns (mock implementations for now)
+6. **06-features-specifications.mdc** - Detailed feature specifications (current vs future)
+7. **07-ui-guidelines.mdc** - UI/UX guidelines and component patterns
+8. **08-data-privacy.mdc** - Data privacy requirements (for future backend)
+9. **09-development-guidelines.mdc** - Development best practices
+10. **10-backend-config.mdc** - Backend configuration reference (future - likely .NET API + PostgreSQL)
+11. **11-typescript-types.mdc** - TypeScript type definitions
+12. **12-ocr-integration.mdc** - OCR service integration patterns
+
+## Usage
+
+- **START HERE**: Always check `00-project-state.mdc` first to understand current progress
+- Rules marked with `alwaysApply: true` are automatically applied to all requests
+- Rules with `globs` patterns apply only to matching file types
+- Rules with `description` can be manually referenced when needed
+
+## Project State Tracking
+
+**IMPORTANT**: The `00-project-state.mdc` file tracks:
+- Which chunks are completed
+- What's currently in progress
+- Key implementation decisions
+- Current architecture state
+- Next steps
+
+**This file should be updated after completing each chunk or major milestone.**
+
+## Quick Reference
+
+### Key Concepts
+- **Frontend-First**: Build complete mobile app with local state
+- **Clean Architecture**: Modular services, separation of concerns
+- **Privacy First**: Anonymized price data contributions (when backend is ready)
+- **Type Safety**: Full TypeScript coverage
+- **Scalable Design**: Prepare for future backend integration
+
+### Core Services (Current - Mock)
+- `services/ocrService.ts` - OCR processing (mock implementation)
+- `services/priceOptimizer.ts` - Price comparison algorithm (mock data)
+- `services/receiptService.ts` - Receipt management (local state)
+- `services/shoppingListService.ts` - Shopping list management (local state)
+
+### Database (Future)
+- Planned: PostgreSQL database
+- Backend API: Likely .NET API
+- Database schema documented for future implementation
+
+### UI Framework
+- React Native Paper components
+- Primary color: `#2ecc71`
+- Minimal, clean design

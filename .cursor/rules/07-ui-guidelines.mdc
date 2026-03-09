@@ -1,0 +1,61 @@
+---
+globs: *.tsx,*.ts,*.jsx,*.js
+description: UI/UX guidelines and component patterns
+---
+
+# UI/UX Guidelines
+
+## Design System
+
+- **Library**: react-native-paper
+- **Primary Color**: `#2ecc71` (green)
+- **Background**: white
+- **Style**: Minimal and clean
+
+## Component Patterns
+
+- Use react-native-paper components (Button, Card, Text, etc.)
+- Consistent spacing and padding
+- Clear visual hierarchy
+- Accessible touch targets (min 44x44)
+
+## Screen Patterns
+
+### Lists
+- Use FlatList for scrollable lists
+- Include pull-to-refresh
+- Show loading states
+- Handle empty states gracefully
+
+### Forms
+- Clear labels
+- Validation feedback
+- Disable submit button during processing
+- Show success/error messages
+
+### Charts
+- Use Victory Native or React Native SVG
+- Include legends
+- Responsive sizing
+- Accessible colors
+
+## Navigation
+
+- Bottom tab navigation (5 tabs)
+- Stack navigation for detail screens
+- Back button on all detail screens
+- Consistent header styling
+
+## Loading States
+
+- Show loading indicators during:
+  - Receipt upload
+  - OCR processing
+  - Data fetching
+  - Price optimization calculations
+
+## Error Handling
+
+- Display user-friendly error messages
+- Retry mechanisms where appropriate
+- Fallback UI for failed operations

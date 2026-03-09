@@ -1,0 +1,46 @@
+---
+alwaysApply: true
+description: ReceiptRadar tech stack and dependencies
+---
+
+# Tech Stack
+
+## Frontend Stack
+
+- **React Native** with **Expo** framework
+- **TypeScript** for type safety
+- **React Navigation** for navigation
+- **Zustand** for client-side state management
+- **TanStack React Query** for server state and caching
+- **react-native-paper** for UI components
+- **Expo Camera** for camera functionality
+- **Expo Image Picker** for gallery access
+- **Victory Native** or **React Native SVG** for charts
+
+## Backend Stack (Future)
+
+**Note**: Backend architecture is not yet finalized. Current focus is frontend-only.
+
+**Planned Backend** (subject to change):
+- **.NET API** (likely choice)
+- **PostgreSQL** database
+- Authentication service (TBD)
+- Cloud storage for receipt images (TBD)
+
+**Current Development**: 
+- Mobile app uses local state management (Zustand)
+- Mock services for data persistence
+- Local storage for development/testing
+
+## OCR Layer (Future Integration)
+
+Design OCR service interface to support:
+- Google Vision API
+- AWS Textract
+- Tesseract (local)
+
+## Theme Configuration
+
+- Primary color: `#2ecc71` (green)
+- Background: white
+- Design: minimal and clean

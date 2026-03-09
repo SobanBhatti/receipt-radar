@@ -1,0 +1,62 @@
+---
+alwaysApply: true
+description: Guidelines for preserving context across chat sessions
+---
+
+# Context Preservation Guidelines
+
+## Starting a New Session
+
+**ALWAYS do these steps first:**
+
+1. **Read `00-project-state.mdc`** - This contains the current project state, completed chunks, and next steps
+2. **Check recent file changes** - Review what was last worked on
+3. **Verify current architecture** - Confirm folder structure matches documented state
+4. **Review TODO list** - Check what tasks are pending
+
+## Maintaining Context
+
+### Update Project State File
+
+The `00-project-state.mdc` file should be updated:
+- ✅ After completing each chunk
+- ✅ After making architectural decisions
+- ✅ After adding significant dependencies
+- ✅ When changing implementation approach
+- ✅ When encountering blockers or issues
+
+### Document Key Decisions
+
+When making important decisions, add them to:
+- `00-project-state.mdc` - "Key Implementation Decisions" section
+- Relevant rule files if it's a pattern/guideline
+
+### Code Comments
+
+For complex logic or non-obvious decisions:
+- Add comments explaining "why" not just "what"
+- Reference architectural decisions in comments
+- Note when something is temporary (e.g., "TODO: Replace with real API")
+
+## What Gets Preserved Automatically
+
+✅ **Cursor Rules** - All `.cursor/rules/*.mdc` files persist  
+✅ **Code Files** - All source code persists  
+✅ **Configuration** - `package.json`, `tsconfig.json`, etc. persist  
+✅ **Project State File** - `00-project-state.mdc` persists and is always applied
+
+## What Needs Manual Updates
+
+⚠️ **Project State** - Must be manually updated after milestones  
+⚠️ **Progress Tracking** - Update `00-project-state.mdc` with completed chunks  
+⚠️ **Architecture Decisions** - Document in project state file
+
+## Quick Context Check
+
+When starting work, verify:
+1. ✅ Read `00-project-state.mdc`
+2. ✅ Check current chunk status
+3. ✅ Review any "Important Notes" section
+4. ✅ Understand what's next
+
+This ensures seamless continuation across sessions.

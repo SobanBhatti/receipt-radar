@@ -1,0 +1,84 @@
+---
+alwaysApply: true
+description: Service layer patterns and interfaces
+---
+
+# Service Layer Architecture
+
+**Note**: Services are currently frontend-only with mock implementations. Backend API integration will be added in future phases.
+
+## OCR Service
+
+### File: `services/ocrService.ts`
+
+**Interface**:
+```typescript
+extractReceiptData(image: ImageSource): Promise<ParsedReceipt>
+```
+
+**Return Type**: `ParsedReceipt`
+```typescript
+{
+  store: string
+  date: Date
+  items: Array<{
+    name_raw: string
+    price: number
+    quantity: number
+  }>
+  total: number
+}
+```
+
+**Responsibilities**:
+- Extract text from receipt image
+- Parse receipt lines
+- Detect product names
+- Detect prices
+- Map raw product names to normalized products (via product_aliases)
+
+**Implementation Notes**:
+- Design as interface/abstract class for future OCR provider swapping
+- Support: Google Vision, AWS Textract, Tesseract
+- MVP: Mock implementation that returns structured test data
+
+## Price Optimizer Service
+
+### File: `services/priceOptimizer.ts`
+
+**Function**: `findCheapestStore(shoppingListItems: ShoppingListItem[]): Promise<PriceComparisonResult>`
+
+**Algorithm** (Future - requires backend):
+1. For each item in shopping list:
+   - Find latest median price per store (from `product_prices_latest` via API)
+   - Compute cost per store
+2. Compute mixed-store optimization
+3. Return two options:
+   - **Option A**: Cheapest single store
+   - **Option B**: Cheapest combination of stores
+
+**Current Implementation**: Mock service with test data
+
+**Return Format**:
+```typescript
+{
+  option1: {
+    stores: string[] // ["Rema 1000"]
+    total: number // 215
+  },
+  option2: {
+    stores: string[] // ["Rema 1000", "Kiwi"]
+    total: number // 198
+  }
+}
+```
+
+## Service Patterns
+
+- All services should be async/await
+- Use TypeScript interfaces for all data structures
+- Handle errors gracefully with try/catch
+- Return typed responses
+- Services should be pure functions when possible
+- **Current**: Services use mock data and local state
+- **Future**: Services will call backend API endpoints

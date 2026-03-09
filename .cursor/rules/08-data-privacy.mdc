@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+description: Data privacy and anonymization requirements
+---
+
+# Data Privacy Requirements
+
+**Note**: These requirements apply when backend is implemented. Current frontend-only phase uses local state.
+
+## Price Observations (Future)
+
+**Critical Rule**: Price observations must be anonymized when backend is implemented.
+
+- **DO NOT** expose `user_id` in public price queries
+- Only aggregated price data should be shown in comparisons
+- Price observations table includes `receipt_id` but user identity is not exposed in public queries
+
+## Query Patterns
+
+### ✅ Allowed (Public Price Queries)
+```sql
+SELECT product_id, store_chain, median_price 
+FROM product_prices_latest
+WHERE product_id IN (...)
+```
+
+### ❌ Forbidden (User-Specific Only)
+```sql
+-- DO NOT expose user_id in price comparison queries
+SELECT user_id, price FROM price_observations -- ❌
+```
+
+## User Data
+
+- Receipts are private to each user (`user_id` foreign key)
+- Shopping lists are private to each user
+- Analytics are user-specific (filtered by authenticated user)
+
+## Storage (Future)
+
+- Receipt images will be stored in cloud storage with user-specific paths
+- Images will not be publicly accessible (require authentication)
+- **Current**: Images stored locally on device (development phase)

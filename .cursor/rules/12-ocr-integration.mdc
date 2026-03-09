@@ -1,0 +1,79 @@
+---
+description: OCR service integration patterns and future providers
+---
+
+# OCR Service Integration
+
+## Service Interface
+
+The OCR service is designed as an abstraction layer to support multiple providers.
+
+### Base Interface
+
+```typescript
+interface OCRProvider {
+  extractReceiptData(image: ImageSource): Promise<ParsedReceipt>
+}
+```
+
+## Future Providers
+
+### Google Vision API
+- Use Google Cloud Vision API
+- Requires API key and project setup
+- Best accuracy for structured receipts
+
+### AWS Textract
+- Use AWS Textract service
+- Requires AWS credentials
+- Good for multi-column receipts
+
+### Tesseract
+- Local OCR processing
+- No API costs
+- Lower accuracy but privacy-friendly
+
+## MVP Implementation
+
+For MVP, create a **mock OCR service** that:
+- Returns structured test data matching `ParsedReceipt` format
+- Simulates parsing delay (1-2 seconds)
+- Can be configured with different test scenarios
+
+## Integration Pattern
+
+```typescript
+// services/ocrService.ts
+class OCRService {
+  private provider: OCRProvider
+  
+  constructor(provider: OCRProvider) {
+    this.provider = provider
+  }
+  
+  async extractReceiptData(image: ImageSource): Promise<ParsedReceipt> {
+    return this.provider.extractReceiptData(image)
+  }
+}
+
+// Usage
+const ocrService = new OCRService(new MockOCRProvider())
+// Later: new OCRService(new GoogleVisionProvider())
+```
+
+## Receipt Parsing Logic
+
+The OCR service should:
+1. Extract raw text from image
+2. Identify store name (usually at top)
+3. Identify purchase date (various formats)
+4. Parse line items (product name + price)
+5. Identify total amount (usually at bottom)
+6. Normalize product names (match to product_aliases)
+
+## Error Handling
+
+- Handle OCR failures gracefully
+- Return partial data if possible
+- Allow manual correction of parsed data
+- Log errors for debugging

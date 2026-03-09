@@ -1,0 +1,51 @@
+---
+alwaysApply: true
+description: ReceiptRadar folder structure and organization
+---
+
+# Folder Structure
+
+```
+/app
+  /screens          # Screen components
+  /components       # Reusable UI components
+  /services         # Business logic and API services
+  /hooks            # Custom React hooks
+  /store            # Zustand state stores
+  /types            # TypeScript type definitions
+  /utils            # Utility functions
+  /lib              # Third-party library configurations
+```
+
+## Key Files
+
+### API Client (Future)
+- `lib/api.ts` - Backend API client (to be created when backend is ready)
+- Currently: Services use mock data and local state
+
+### Service Layer
+- `services/ocrService.ts` - OCR processing interface and implementation (mock for now)
+- `services/priceOptimizer.ts` - Price optimization algorithm (mock data for now)
+- `services/receiptService.ts` - Receipt management (local state for now)
+- `services/shoppingListService.ts` - Shopping list management (local state for now)
+
+### Screen Files
+- `screens/Login.tsx` - Dummy login page (authentication deferred)
+- `screens/HomeDashboard.tsx`
+- `screens/UploadReceipt.tsx`
+- `screens/ReceiptHistory.tsx`
+- `screens/ReceiptDetail.tsx`
+- `screens/Analytics.tsx`
+- `screens/ShoppingLists.tsx`
+- `screens/ShoppingListDetail.tsx`
+- `screens/PriceComparisonResult.tsx`
+- `screens/Profile.tsx`
+
+## Navigation Structure
+
+Bottom Tab Navigator with 5 tabs:
+1. **Home** - Home Dashboard
+2. **Receipts** - Receipt History
+3. **Shopping** - Shopping Lists
+4. **Analytics** - Analytics Dashboard
+5. **Profile** - User Profile

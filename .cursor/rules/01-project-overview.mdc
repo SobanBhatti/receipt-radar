@@ -1,0 +1,53 @@
+---
+alwaysApply: true
+description: ReceiptRadar project overview and core concepts
+---
+
+# ReceiptRadar - Project Overview
+
+ReceiptRadar is a mobile application built with React Native (Expo + TypeScript) that allows users to:
+- Upload shopping receipts via camera or gallery
+- Store receipts in a personal receipt history
+- Analyze spending patterns (monthly, per store)
+- Contribute anonymized price data to a crowdsourced grocery price database
+- Build shopping lists
+- Find the cheapest store for their shopping list using price optimization
+
+## Current Focus: Frontend Mobile App
+
+**Important**: The current development phase focuses exclusively on the mobile app frontend. Backend API and database integration will be implemented later (likely .NET API + PostgreSQL).
+
+## Core Architecture Principles
+
+- **Frontend-First**: Build complete mobile app with local state management
+- **Clean Architecture**: Separate concerns with clear service layers
+- **Scalable Data Models**: Design for growth and future features
+- **Modular Services**: Reusable, testable service components
+- **Privacy First**: Anonymize price data contributions (when backend is integrated)
+- **Type Safety**: Full TypeScript coverage
+
+## Development Phases
+
+### Phase 1 (Current - Frontend MVP)
+- Mobile app UI/UX implementation
+- Dummy login page (authentication deferred - no real auth yet)
+- Receipt upload (camera/gallery) - local storage/mock
+- OCR placeholder service (mock implementation)
+- Receipt history and detail views (local state)
+- Basic analytics dashboard (local data)
+- Shopping list management (local state)
+- Price optimization UI (mock data)
+
+### Phase 2 (Future - Backend Integration)
+- Backend API integration (likely .NET API)
+- Database integration (PostgreSQL)
+- Real authentication system (TBD - email, OAuth, etc.)
+- Cloud storage for receipt images
+- Real price observation creation
+- Server-side price optimization
+
+### Future Extensions
+- Barcode scanning
+- Automatic email receipt import
+- Location-based pricing
+- Improved AI receipt parsing
