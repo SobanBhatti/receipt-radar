@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, FlatList, Alert, ActivityIndicator } from 'react-native';
 import { Text, Card, FAB, Dialog, TextInput, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -7,28 +7,34 @@ import { theme } from '../lib/theme';
 import { useShoppingListStore } from '../store/useShoppingListStore';
 import { ShoppingList } from '../types';
 
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth context
+
 export default function ShoppingListsScreen() {
   const navigation = useNavigation<any>();
-  const { lists, addList, deleteList } = useShoppingListStore();
+  const { lists, loading, error, fetchShoppingLists, createShoppingList, deleteShoppingList } = useShoppingListStore();
   const [dialogVisible, setDialogVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
 
-  const handleCreateList = () => {
+  // Fetch shopping lists on mount
+  useEffect(() => {
+    fetchShoppingLists(DUMMY_USER_ID).catch((err) => {
+      console.error('Failed to fetch shopping lists:', err);
+    });
+  }, [fetchShoppingLists]);
+
+  const handleCreateList = async () => {
     if (!newListName.trim()) {
       Alert.alert('Error', 'Please enter a list name');
       return;
     }
 
-    const newList: ShoppingList = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      user_id: 'mock-user-id',
-      name: newListName.trim(),
-      created_at: new Date().toISOString(),
-    };
-
-    addList(newList);
-    setNewListName('');
-    setDialogVisible(false);
+    try {
+      await createShoppingList(newListName.trim(), DUMMY_USER_ID);
+      setNewListName('');
+      setDialogVisible(false);
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to create shopping list');
+    }
   };
 
   const handleDeleteList = (list: ShoppingList) => {
@@ -40,7 +46,13 @@ export default function ShoppingListsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => deleteList(list.id),
+          onPress: async () => {
+            try {
+              await deleteShoppingList(list.id, DUMMY_USER_ID);
+            } catch (err: any) {
+              Alert.alert('Error', err.message || 'Failed to delete shopping list');
+            }
+          },
         },
       ]
     );
@@ -51,13 +63,19 @@ export default function ShoppingListsScreen() {
   };
 
   const renderList = ({ item }: { item: ShoppingList }) => {
-    const formatDate = (dateString: string) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
+    const formatDate = (dateString: string | undefined) => {
+      if (!dateString) return 'Unknown date';
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Invalid date';
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+      } catch {
+        return 'Invalid date';
+      }
     };
 
     return (
@@ -79,7 +97,7 @@ export default function ShoppingListsScreen() {
                   {item.name}
                 </Text>
                 <Text variant="bodySmall" style={styles.listDate}>
-                  Created {formatDate(item.created_at)}
+                  Created {formatDate(item.createdAt)}
                 </Text>
               </View>
             </View>
@@ -109,6 +127,17 @@ export default function ShoppingListsScreen() {
       </Text>
     </View>
   );
+
+  if (loading && lists.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text variant="bodyMedium" style={styles.loadingText}>
+          Loading shopping lists...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -155,6 +184,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+  },
+  loadingText: {
+    marginTop: 16,
+    color: theme.colors.onSurfaceVariant,
   },
   list: {
     padding: 16,

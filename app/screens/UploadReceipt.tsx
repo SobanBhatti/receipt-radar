@@ -135,7 +135,7 @@ export default function UploadReceiptScreen() {
 
       Alert.alert(
         'Success!',
-        `Receipt from ${receipt.store_name} saved successfully!`,
+        `Receipt from ${receipt.storeName} saved successfully!`,
         [
           {
             text: 'View Receipt',

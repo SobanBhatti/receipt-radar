@@ -10,30 +10,30 @@ export interface Product {
 
 export interface ProductAlias {
   id: string;
-  alias_name: string;
-  product_id: string;
+  aliasName: string;
+  productId: string;
 }
 
 export interface PriceObservation {
   id: string;
-  product_id: string;
-  store_chain: string;
-  store_name: string;
+  productId: string;
+  storeChain: string;
+  storeName: string;
   price: number;
   timestamp: string; // ISO timestamp
-  receipt_id: string;
+  receiptId: string;
 }
 
 export interface ProductPriceLatest {
-  product_id: string;
-  store_chain: string;
-  median_price: number;
-  last_updated: string; // ISO timestamp
-  observation_count: number;
+  productId: string;
+  storeChain: string;
+  medianPrice: number;
+  lastUpdated: string; // ISO timestamp
+  observationCount: number;
 }
 
 /**
- * Store chains supported by the app
+ * Store chains supported by the app (Norwegian stores)
  */
 export type StoreChain = 
   | 'Kiwi'
@@ -42,7 +42,9 @@ export type StoreChain =
   | 'Coop Prix'
   | 'Coop Mega'
   | 'Meny'
-  | 'Spar';
+  | 'Spar'
+  | 'Joker'
+  | 'Bunnpris';
 
 export interface Store {
   id: string;

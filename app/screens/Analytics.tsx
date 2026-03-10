@@ -1,30 +1,71 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { Text, Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../lib/theme';
-import { useReceiptStore } from '../store/useReceiptStore';
 import {
-  calculateMonthlySpending,
-  calculateStoreSpending,
-  calculateTopProducts,
-  calculateSpendingSummary,
-  formatCurrency,
-  formatMonth,
-} from '../utils/analytics';
+  fetchSpendingSummary,
+  fetchMonthlySpending,
+  fetchStoreSpending,
+  fetchTopProducts,
+} from '../services/analyticsService';
+import { formatCurrency, formatMonth } from '../utils/analytics';
+import { SpendingSummary, MonthlySpending, StoreSpending, TopProduct } from '../types/analytics';
+
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth context
 
 export default function AnalyticsScreen() {
-  const { receipts, receiptItems } = useReceiptStore();
+  const [summary, setSummary] = useState<SpendingSummary | null>(null);
+  const [monthlySpending, setMonthlySpending] = useState<MonthlySpending[]>([]);
+  const [storeSpending, setStoreSpending] = useState<StoreSpending[]>([]);
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const summary = useMemo(() => calculateSpendingSummary(receipts), [receipts]);
-  const monthlySpending = useMemo(() => calculateMonthlySpending(receipts), [receipts]);
-  const storeSpending = useMemo(() => calculateStoreSpending(receipts), [receipts]);
-  const topProducts = useMemo(
-    () => calculateTopProducts(receipts, receiptItems, 5),
-    [receipts, receiptItems]
-  );
+  const loadAnalytics = async () => {
+    try {
+      const [summaryData, monthlyData, storeData, topProductsData] = await Promise.all([
+        fetchSpendingSummary(DUMMY_USER_ID),
+        fetchMonthlySpending(DUMMY_USER_ID),
+        fetchStoreSpending(DUMMY_USER_ID),
+        fetchTopProducts(DUMMY_USER_ID, 5),
+      ]);
 
-  const hasData = receipts.length > 0;
+      setSummary(summaryData);
+      setMonthlySpending(monthlyData);
+      setStoreSpending(storeData);
+      setTopProducts(topProductsData);
+    } catch (err) {
+      console.error('Failed to load analytics:', err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAnalytics();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadAnalytics();
+  };
+
+  const hasData = summary !== null && (summary.thisYear > 0 || monthlySpending.length > 0);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text variant="bodyMedium" style={styles.emptyText}>
+            Loading analytics...
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   if (!hasData) {
     return (
@@ -46,10 +87,18 @@ export default function AnalyticsScreen() {
     );
   }
 
+  const displaySummary = summary || {
+    thisMonth: 0,
+    lastMonth: 0,
+    thisYear: 0,
+    averagePerMonth: 0,
+  };
+
   return (
     <ScrollView 
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.content}>
         {/* Summary Cards */}
@@ -60,7 +109,7 @@ export default function AnalyticsScreen() {
                 This Month
               </Text>
               <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(summary.thisMonth)}
+                {formatCurrency(displaySummary.thisMonth)}
               </Text>
             </Card.Content>
           </Card>
@@ -70,7 +119,7 @@ export default function AnalyticsScreen() {
                 Last Month
               </Text>
               <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(summary.lastMonth)}
+                {formatCurrency(displaySummary.lastMonth)}
               </Text>
             </Card.Content>
           </Card>
@@ -83,7 +132,7 @@ export default function AnalyticsScreen() {
                 This Year
               </Text>
               <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(summary.thisYear)}
+                {formatCurrency(displaySummary.thisYear)}
               </Text>
             </Card.Content>
           </Card>
@@ -93,7 +142,7 @@ export default function AnalyticsScreen() {
                 Avg/Month
               </Text>
               <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(summary.averagePerMonth)}
+                {formatCurrency(displaySummary.averagePerMonth)}
               </Text>
             </Card.Content>
           </Card>
@@ -126,8 +175,8 @@ export default function AnalyticsScreen() {
                 Spending by Store
               </Text>
               {storeSpending.slice(0, 5).map((item) => (
-                <View key={item.store_chain} style={styles.storeRow}>
-                  <Text variant="bodyLarge">{item.store_chain}</Text>
+                <View key={item.storeChain} style={styles.storeRow}>
+                  <Text variant="bodyLarge">{item.storeChain}</Text>
                   <Text variant="titleMedium" style={styles.storeAmount}>
                     {formatCurrency(item.total)}
                   </Text>
@@ -145,17 +194,17 @@ export default function AnalyticsScreen() {
                 Top Products
               </Text>
               {topProducts.map((product, index) => (
-                <View key={product.product_name} style={styles.productRow}>
+                <View key={product.productName} style={styles.productRow}>
                   <View style={styles.productInfo}>
                     <Text variant="bodyLarge" style={styles.productName}>
-                      {index + 1}. {product.product_name}
+                      {index + 1}. {product.productName}
                     </Text>
                     <Text variant="bodySmall" style={styles.productDetails}>
-                      {product.purchase_count} purchases
+                      {product.purchaseCount} purchases
                     </Text>
                   </View>
                   <Text variant="titleMedium" style={styles.productAmount}>
-                    {formatCurrency(product.total_spent)}
+                    {formatCurrency(product.totalSpent)}
                   </Text>
                 </View>
               ))}

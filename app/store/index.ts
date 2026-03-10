@@ -5,3 +5,4 @@
 export { useReceiptStore } from './useReceiptStore';
 export { useShoppingListStore } from './useShoppingListStore';
 export { useUserStore } from './useUserStore';
+export { useStoreStore } from './useStoreStore';

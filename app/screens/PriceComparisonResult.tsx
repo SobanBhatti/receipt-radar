@@ -119,7 +119,7 @@ export default function PriceComparisonResultScreen() {
               {option.breakdown.map((item, index) => (
                 <View key={index} style={styles.breakdownRow}>
                   <Text variant="bodyMedium" style={styles.breakdownProduct}>
-                    {getProductName(item.product_id)}
+                    {getProductName(item.productId)}
                   </Text>
                   <View style={styles.breakdownRight}>
                     <Text variant="bodySmall" style={styles.breakdownStore}>

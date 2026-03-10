@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import {
   Text,
   Card,
@@ -14,8 +14,10 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../lib/theme';
 import { useShoppingListStore } from '../store/useShoppingListStore';
-import { generateMockProducts } from '../utils/mockData';
-import { Product, ShoppingListItem } from '../types';
+import { productApi } from '../services/apiService';
+import { Product, ShoppingListItem, ShoppingListWithItems } from '../types';
+
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth context
 
 export default function ShoppingListDetailScreen() {
   const route = useRoute<any>();
@@ -23,30 +25,102 @@ export default function ShoppingListDetailScreen() {
   const listId = route.params?.listId;
   const {
     getList,
-    updateList,
-    addItemToList,
-    updateListItem,
-    removeItemFromList,
+    fetchShoppingList,
+    updateShoppingList,
+    addShoppingListItem,
+    updateShoppingListItem,
+    deleteShoppingListItem,
+    loading,
   } = useShoppingListStore();
 
-  const list = listId ? getList(listId) : null;
+  const [list, setList] = useState<ShoppingListWithItems | null>(null);
+  const [loadingList, setLoadingList] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [productDialogVisible, setProductDialogVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState('1');
   const [editNameDialogVisible, setEditNameDialogVisible] = useState(false);
   const [editName, setEditName] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
-  const allProducts = useMemo(() => generateMockProducts(), []);
+  // Fetch shopping list on mount
+  useEffect(() => {
+    const loadList = async () => {
+      if (!listId) {
+        setLoadingList(false);
+        return;
+      }
+
+      // Try to get from store first
+      const cachedList = getList(listId);
+      if (cachedList) {
+        setList(cachedList);
+        setLoadingList(false);
+        return;
+      }
+
+      // Fetch from API if not in store
+      try {
+        const fetchedList = await fetchShoppingList(listId, DUMMY_USER_ID);
+        setList(fetchedList);
+      } catch (err) {
+        console.error('Failed to fetch shopping list:', err);
+      } finally {
+        setLoadingList(false);
+      }
+    };
+
+    loadList();
+  }, [listId, getList, fetchShoppingList]);
+
+  // Fetch products from API
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoadingProducts(true);
+      try {
+        const response = await productApi.apiProductGet();
+        const productDtos = response.data || [];
+        const fetchedProducts: Product[] = productDtos
+          .filter(p => p.id && p.name)
+          .map(p => ({
+            id: p.id!,
+            name: p.name || '',
+            category: p.category || '',
+          }));
+        setProducts(fetchedProducts);
+      } catch (err) {
+        console.error('Failed to fetch products:', err);
+        // Fallback to empty array if API fails
+        setProducts([]);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    loadProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return allProducts.slice(0, 10); // Show first 10 when no search
+    if (!searchQuery.trim()) return products.slice(0, 10); // Show first 10 when no search
 
     const query = searchQuery.toLowerCase();
-    return allProducts.filter((product) =>
+    return products.filter((product) =>
       product.name.toLowerCase().includes(query)
     );
-  }, [allProducts, searchQuery]);
+  }, [products, searchQuery]);
+
+  if (loadingList) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text variant="bodyMedium" style={styles.emptyText}>
+            Loading shopping list...
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   if (!listId || !list) {
     return (
@@ -71,7 +145,7 @@ export default function ShoppingListDetailScreen() {
     setProductDialogVisible(true);
   };
 
-  const handleConfirmAddProduct = () => {
+  const handleConfirmAddProduct = async () => {
     if (!selectedProduct) return;
 
     const qty = parseFloat(quantity);
@@ -80,25 +154,32 @@ export default function ShoppingListDetailScreen() {
       return;
     }
 
-    const newItem: ShoppingListItem = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      list_id: listId,
-      product_id: selectedProduct.id,
-      quantity: qty,
-    };
-
-    addItemToList(newItem);
-    setProductDialogVisible(false);
-    setSelectedProduct(null);
-    setQuantity('1');
-    setSearchQuery('');
+    try {
+      const newItem = await addShoppingListItem(listId, selectedProduct.id, qty, DUMMY_USER_ID);
+      // Refresh list to get updated data
+      const updatedList = await fetchShoppingList(listId, DUMMY_USER_ID);
+      setList(updatedList);
+      setProductDialogVisible(false);
+      setSelectedProduct(null);
+      setQuantity('1');
+      setSearchQuery('');
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to add item');
+    }
   };
 
-  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeItemFromList(itemId);
-    } else {
-      updateListItem(itemId, { quantity: newQuantity });
+  const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
+    try {
+      if (newQuantity <= 0) {
+        await deleteShoppingListItem(listId, itemId, DUMMY_USER_ID);
+      } else {
+        await updateShoppingListItem(listId, itemId, newQuantity, DUMMY_USER_ID);
+      }
+      // Refresh list to get updated data
+      const updatedList = await fetchShoppingList(listId, DUMMY_USER_ID);
+      setList(updatedList);
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to update item');
     }
   };
 
@@ -107,17 +188,22 @@ export default function ShoppingListDetailScreen() {
     setEditNameDialogVisible(true);
   };
 
-  const handleSaveName = () => {
+  const handleSaveName = async () => {
     if (!editName.trim()) {
       Alert.alert('Error', 'List name cannot be empty');
       return;
     }
-    updateList(listId, { name: editName.trim() });
-    setEditNameDialogVisible(false);
+    try {
+      const updatedList = await updateShoppingList(listId, editName.trim(), DUMMY_USER_ID);
+      setList(updatedList);
+      setEditNameDialogVisible(false);
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to update list name');
+    }
   };
 
   const getProductName = (productId: string) => {
-    const product = allProducts.find((p) => p.id === productId);
+    const product = products.find((p) => p.id === productId);
     return product?.name || 'Unknown Product';
   };
 
@@ -162,22 +248,33 @@ export default function ShoppingListDetailScreen() {
               style={styles.searchbar}
               iconColor={theme.colors.onSurfaceVariant}
             />
-            {searchQuery.trim() && (
+            {(searchQuery.trim() || products.length > 0) && (
               <View style={styles.productSuggestions}>
-                {filteredProducts.map((product) => (
-                  <Chip
-                    key={product.id}
-                    onPress={() => handleAddProduct(product)}
-                    style={styles.productChip}
-                    icon="plus"
-                  >
-                    {product.name}
-                  </Chip>
-                ))}
-                {filteredProducts.length === 0 && (
-                  <Text variant="bodySmall" style={styles.noResults}>
-                    No products found
-                  </Text>
+                {loadingProducts ? (
+                  <ActivityIndicator size="small" color={theme.colors.primary} />
+                ) : (
+                  <>
+                    {filteredProducts.map((product) => (
+                      <Chip
+                        key={product.id}
+                        onPress={() => handleAddProduct(product)}
+                        style={styles.productChip}
+                        icon="plus"
+                      >
+                        {product.name}
+                      </Chip>
+                    ))}
+                    {filteredProducts.length === 0 && searchQuery.trim() && (
+                      <Text variant="bodySmall" style={styles.noResults}>
+                        No products found
+                      </Text>
+                    )}
+                    {!searchQuery.trim() && products.length > 0 && (
+                      <Text variant="bodySmall" style={styles.hintText}>
+                        Start typing to search products...
+                      </Text>
+                    )}
+                  </>
                 )}
               </View>
             )}
@@ -206,7 +303,7 @@ export default function ShoppingListDetailScreen() {
                 <View key={item.id} style={styles.itemRow}>
                   <View style={styles.itemInfo}>
                     <Text variant="bodyLarge" style={styles.itemName}>
-                      {getProductName(item.product_id)}
+                      {item.productName || getProductName(item.productId)}
                     </Text>
                   </View>
                   <View style={styles.quantityControls}>
@@ -232,7 +329,15 @@ export default function ShoppingListDetailScreen() {
                     <IconButton
                       icon="delete"
                       size={20}
-                      onPress={() => removeItemFromList(item.id)}
+                      onPress={async () => {
+                        try {
+                          await deleteShoppingListItem(listId, item.id, DUMMY_USER_ID);
+                          const updatedList = await fetchShoppingList(listId, DUMMY_USER_ID);
+                          setList(updatedList);
+                        } catch (err: any) {
+                          Alert.alert('Error', err.message || 'Failed to delete item');
+                        }
+                      }}
                       iconColor={theme.colors.error}
                     />
                   </View>

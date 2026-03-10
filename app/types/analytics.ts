@@ -8,14 +8,14 @@ export interface MonthlySpending {
 }
 
 export interface StoreSpending {
-  store_chain: string;
+  storeChain: string;
   total: number;
 }
 
 export interface TopProduct {
-  product_name: string;
-  purchase_count: number;
-  total_spent: number;
+  productName: string;
+  purchaseCount: number;
+  totalSpent: number;
 }
 
 export interface SpendingSummary {

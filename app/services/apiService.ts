@@ -3,7 +3,16 @@
  */
 
 import { API_CONFIG } from '../lib/apiConfig';
-import { Configuration, UserApi, ReceiptApi, ShoppingListApi } from '../generated/api';
+import {
+  Configuration,
+  UserApi,
+  ReceiptApi,
+  ShoppingListApi,
+  ProductApi,
+  AnalyticsApi,
+  PriceOptimizerApi,
+  StoreApi,
+} from '../generated/api/index';
 
 // Create API configuration
 const apiConfiguration = new Configuration({
@@ -17,6 +26,10 @@ const apiConfiguration = new Configuration({
 export const userApi = new UserApi(apiConfiguration);
 export const receiptApi = new ReceiptApi(apiConfiguration);
 export const shoppingListApi = new ShoppingListApi(apiConfiguration);
+export const productApi = new ProductApi(apiConfiguration);
+export const analyticsApi = new AnalyticsApi(apiConfiguration);
+export const priceOptimizerApi = new PriceOptimizerApi(apiConfiguration);
+export const storeApi = new StoreApi(apiConfiguration);
 
 // Re-export types from generated API
-export * from '../generated/api';
+export * from '../generated/api/index';

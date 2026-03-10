@@ -6,15 +6,16 @@ import { Product } from './product';
 
 export interface ShoppingList {
   id: string;
-  user_id: string;
+  userId: string;
   name: string;
-  created_at: string; // ISO timestamp
+  createdAt: string; // ISO timestamp
 }
 
 export interface ShoppingListItem {
   id: string;
-  list_id: string;
-  product_id: string;
+  listId: string;
+  productId: string;
+  productName?: string; // Product name from API (optional for backward compatibility)
   quantity: number;
 }
 

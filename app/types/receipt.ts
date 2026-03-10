@@ -3,7 +3,7 @@
  */
 
 export interface ParsedReceiptItem {
-  name_raw: string;
+  nameRaw: string;
   price: number;
   quantity: number;
 }
@@ -17,24 +17,24 @@ export interface ParsedReceipt {
 
 export interface Receipt {
   id: string;
-  user_id: string;
-  store_name: string;
-  store_chain: string;
-  purchase_date: string; // ISO date string
-  total_amount: number;
-  receipt_image_url: string | null;
-  created_at: string; // ISO timestamp
+  userId: string;
+  storeName: string;
+  storeChain: string;
+  purchaseDate: string; // ISO date string
+  totalAmount: number;
+  receiptImageUrl: string | null;
+  createdAt: string; // ISO timestamp
 }
 
 export interface ReceiptItem {
   id: string;
-  receipt_id: string;
-  product_name_raw: string;
-  normalized_product_id: string | null;
+  receiptId: string;
+  productNameRaw: string;
+  normalizedProductId: string | null;
   price: number;
   quantity: number;
-  unit_price: number;
-  created_at: string; // ISO timestamp
+  unitPrice: number;
+  createdAt: string; // ISO timestamp
 }
 
 export interface ReceiptWithItems extends Receipt {

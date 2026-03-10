@@ -1,27 +1,54 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useMemo, useEffect, useState } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Text, Card, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../lib/theme';
 import { useReceiptStore } from '../store/useReceiptStore';
-import { calculateSpendingSummary, formatCurrency } from '../utils/analytics';
+import { fetchSpendingSummary } from '../services/analyticsService';
+import { formatCurrency } from '../utils/analytics';
 import ReceiptCard from '../components/ReceiptCard';
 import { Receipt } from '../types';
+import { SpendingSummary } from '../types/analytics';
+
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth context
 
 export default function HomeDashboardScreen() {
   const navigation = useNavigation<any>();
-  const { receipts } = useReceiptStore();
+  const { receipts, fetchReceipts } = useReceiptStore();
+  const [summary, setSummary] = useState<SpendingSummary | null>(null);
+  const [loadingSummary, setLoadingSummary] = useState(true);
 
-  // Calculate spending summary
-  const summary = useMemo(() => calculateSpendingSummary(receipts), [receipts]);
+  // Fetch receipts and summary on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await fetchReceipts(DUMMY_USER_ID);
+        const summaryData = await fetchSpendingSummary(DUMMY_USER_ID);
+        setSummary(summaryData);
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      } finally {
+        setLoadingSummary(false);
+      }
+    };
+    loadData();
+  }, [fetchReceipts]);
+
+  // Use summary from API, fallback to calculated if not loaded yet
+  const displaySummary = summary || {
+    thisMonth: 0,
+    lastMonth: 0,
+    thisYear: 0,
+    averagePerMonth: 0,
+  };
 
   // Get latest receipts (last 5, sorted by date descending)
   const latestReceipts = useMemo(() => {
     return [...receipts]
       .sort((a, b) => {
-        const dateA = new Date(a.purchase_date).getTime();
-        const dateB = new Date(b.purchase_date).getTime();
+        const dateA = new Date(a.purchaseDate).getTime();
+        const dateB = new Date(b.purchaseDate).getTime();
         return dateB - dateA;
       })
       .slice(0, 5);
@@ -50,7 +77,11 @@ export default function HomeDashboardScreen() {
                   This Month's Spending
                 </Text>
                 <Text variant="headlineMedium" style={styles.summaryAmount}>
-                  {formatCurrency(summary.thisMonth)}
+                  {loadingSummary ? (
+                    <ActivityIndicator size="small" color={theme.colors.primary} />
+                  ) : (
+                    formatCurrency(displaySummary.thisMonth)
+                  )}
                 </Text>
               </View>
               <MaterialCommunityIcons
@@ -60,12 +91,12 @@ export default function HomeDashboardScreen() {
               />
             </View>
             
-            {summary.lastMonth > 0 && (
+            {displaySummary.lastMonth > 0 && (
               <View style={styles.comparisonRow}>
                 <Text variant="bodySmall" style={styles.comparisonLabel}>
-                  Last month: {formatCurrency(summary.lastMonth)}
+                  Last month: {formatCurrency(displaySummary.lastMonth)}
                 </Text>
-                {summary.thisMonth > summary.lastMonth && (
+                {displaySummary.thisMonth > displaySummary.lastMonth && (
                   <View style={styles.increaseBadge}>
                     <MaterialCommunityIcons
                       name="arrow-up"
@@ -73,11 +104,11 @@ export default function HomeDashboardScreen() {
                       color={theme.colors.error}
                     />
                     <Text variant="bodySmall" style={styles.increaseText}>
-                      {formatCurrency(summary.thisMonth - summary.lastMonth)} more
+                      {formatCurrency(displaySummary.thisMonth - displaySummary.lastMonth)} more
                     </Text>
                   </View>
                 )}
-                {summary.thisMonth < summary.lastMonth && (
+                {displaySummary.thisMonth < displaySummary.lastMonth && (
                   <View style={styles.decreaseBadge}>
                     <MaterialCommunityIcons
                       name="arrow-down"
@@ -85,7 +116,7 @@ export default function HomeDashboardScreen() {
                       color={theme.colors.primary}
                     />
                     <Text variant="bodySmall" style={styles.decreaseText}>
-                      {formatCurrency(summary.lastMonth - summary.thisMonth)} less
+                      {formatCurrency(displaySummary.lastMonth - displaySummary.thisMonth)} less
                     </Text>
                   </View>
                 )}
@@ -210,7 +241,7 @@ export default function HomeDashboardScreen() {
                     This Year
                   </Text>
                   <Text variant="titleMedium" style={styles.statValue}>
-                    {formatCurrency(summary.thisYear)}
+                    {formatCurrency(displaySummary.thisYear)}
                   </Text>
                 </View>
               </Card.Content>
@@ -228,7 +259,7 @@ export default function HomeDashboardScreen() {
                     Avg/Month
                   </Text>
                   <Text variant="titleMedium" style={styles.statValue}>
-                    {formatCurrency(summary.averagePerMonth)}
+                    {formatCurrency(displaySummary.averagePerMonth)}
                   </Text>
                 </View>
               </Card.Content>

@@ -26,7 +26,7 @@ export interface PriceComparisonOption {
   stores: string[];
   total: number;
   breakdown?: Array<{
-    product_id: string;
+    productId: string;
     store: string;
     price: number;
   }>;

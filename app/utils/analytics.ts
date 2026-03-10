@@ -13,9 +13,9 @@ export function calculateMonthlySpending(receipts: Receipt[]): MonthlySpending[]
   const monthlyMap = new Map<string, number>();
 
   receipts.forEach((receipt) => {
-    const month = receipt.purchase_date.substring(0, 7); // YYYY-MM
+    const month = receipt.purchaseDate.substring(0, 7); // YYYY-MM
     const current = monthlyMap.get(month) || 0;
-    monthlyMap.set(month, current + receipt.total_amount);
+    monthlyMap.set(month, current + receipt.totalAmount);
   });
 
   return Array.from(monthlyMap.entries())
@@ -30,13 +30,13 @@ export function calculateStoreSpending(receipts: Receipt[]): StoreSpending[] {
   const storeMap = new Map<string, number>();
 
   receipts.forEach((receipt) => {
-    const chain = receipt.store_chain || 'Unknown';
+    const chain = receipt.storeChain || 'Unknown';
     const current = storeMap.get(chain) || 0;
-    storeMap.set(chain, current + receipt.total_amount);
+    storeMap.set(chain, current + receipt.totalAmount);
   });
 
   return Array.from(storeMap.entries())
-    .map(([store_chain, total]) => ({ store_chain, total }))
+    .map(([storeChain, total]) => ({ storeChain, total }))
     .sort((a, b) => b.total - a.total); // Sort by total descending
 }
 
@@ -51,9 +51,9 @@ export function calculateTopProducts(
   const productMap = new Map<string, { count: number; total: number }>();
 
   receipts.forEach((receipt) => {
-    const items = receiptItems.filter((item) => item.receipt_id === receipt.id);
+    const items = receiptItems.filter((item) => item.receiptId === receipt.id);
     items.forEach((item) => {
-      const name = item.product_name_raw;
+      const name = item.productNameRaw;
       const current = productMap.get(name) || { count: 0, total: 0 };
       productMap.set(name, {
         count: current.count + item.quantity,
@@ -63,12 +63,12 @@ export function calculateTopProducts(
   });
 
   return Array.from(productMap.entries())
-    .map(([product_name, data]) => ({
-      product_name,
-      purchase_count: data.count,
-      total_spent: data.total,
+    .map(([productName, data]) => ({
+      productName,
+      purchaseCount: data.count,
+      totalSpent: data.total,
     }))
-    .sort((a, b) => b.total_spent - a.total_spent)
+    .sort((a, b) => b.totalSpent - a.totalSpent)
     .slice(0, limit);
 }
 
@@ -82,26 +82,26 @@ export function calculateSpendingSummary(receipts: Receipt[]): SpendingSummary {
 
   // This month
   const thisMonthReceipts = receipts.filter((r) => {
-    const date = new Date(r.purchase_date);
+    const date = new Date(r.purchaseDate);
     return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
   });
-  const thisMonthTotal = thisMonthReceipts.reduce((sum, r) => sum + r.total_amount, 0);
+  const thisMonthTotal = thisMonthReceipts.reduce((sum, r) => sum + r.totalAmount, 0);
 
   // Last month
   const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
   const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
   const lastMonthReceipts = receipts.filter((r) => {
-    const date = new Date(r.purchase_date);
+    const date = new Date(r.purchaseDate);
     return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
   });
-  const lastMonthTotal = lastMonthReceipts.reduce((sum, r) => sum + r.total_amount, 0);
+  const lastMonthTotal = lastMonthReceipts.reduce((sum, r) => sum + r.totalAmount, 0);
 
   // This year
   const thisYearReceipts = receipts.filter((r) => {
-    const date = new Date(r.purchase_date);
+    const date = new Date(r.purchaseDate);
     return date.getFullYear() === thisYear;
   });
-  const thisYearTotal = thisYearReceipts.reduce((sum, r) => sum + r.total_amount, 0);
+  const thisYearTotal = thisYearReceipts.reduce((sum, r) => sum + r.totalAmount, 0);
 
   // Average per month (based on months with data)
   const monthlySpending = calculateMonthlySpending(receipts);

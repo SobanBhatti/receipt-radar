@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, StyleSheet, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
 import { Text, Searchbar, Chip, FAB } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -10,12 +10,21 @@ import { Receipt } from '../types';
 
 type SortOption = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc';
 
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth context
+
 export default function ReceiptHistoryScreen() {
   const navigation = useNavigation<any>();
-  const { receipts } = useReceiptStore();
+  const { receipts, loading, error, fetchReceipts, refreshReceipts } = useReceiptStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('date-desc');
   const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch receipts on mount
+  useEffect(() => {
+    fetchReceipts(DUMMY_USER_ID).catch((err) => {
+      console.error('Failed to fetch receipts:', err);
+    });
+  }, [fetchReceipts]);
 
   const filteredAndSortedReceipts = useMemo(() => {
     let filtered = [...receipts];
@@ -25,8 +34,8 @@ export default function ReceiptHistoryScreen() {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (receipt) =>
-          receipt.store_name.toLowerCase().includes(query) ||
-          receipt.store_chain.toLowerCase().includes(query)
+          receipt.storeName.toLowerCase().includes(query) ||
+          receipt.storeChain.toLowerCase().includes(query)
       );
     }
 
@@ -34,13 +43,13 @@ export default function ReceiptHistoryScreen() {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'date-desc':
-          return new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime();
+          return new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime();
         case 'date-asc':
-          return new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime();
+          return new Date(a.purchaseDate).getTime() - new Date(b.purchaseDate).getTime();
         case 'amount-desc':
-          return b.total_amount - a.total_amount;
+          return b.totalAmount - a.totalAmount;
         case 'amount-asc':
-          return a.total_amount - b.total_amount;
+          return a.totalAmount - b.totalAmount;
         default:
           return 0;
       }
@@ -49,13 +58,16 @@ export default function ReceiptHistoryScreen() {
     return filtered;
   }, [receipts, searchQuery, sortBy]);
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
-    // Simulate refresh (in future, this would refetch from API)
-    setTimeout(() => {
+    try {
+      await refreshReceipts(DUMMY_USER_ID);
+    } catch (err) {
+      console.error('Failed to refresh receipts:', err);
+    } finally {
       setRefreshing(false);
-    }, 1000);
-  }, []);
+    }
+  }, [refreshReceipts]);
 
   const handleReceiptPress = (receipt: Receipt) => {
     navigation.navigate('ReceiptDetail', { receiptId: receipt.id });
@@ -80,6 +92,17 @@ export default function ReceiptHistoryScreen() {
       </Text>
     </View>
   );
+
+  if (loading && receipts.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text variant="bodyMedium" style={styles.loadingText}>
+          Loading receipts...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -160,6 +183,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+  },
+  loadingText: {
+    marginTop: 16,
+    color: theme.colors.onSurfaceVariant,
   },
   header: {
     padding: 16,

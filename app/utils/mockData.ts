@@ -25,24 +25,24 @@ export function generateMockReceipt(
 
   const receipt: Receipt = {
     id: receiptId,
-    user_id: 'mock-user-id',
-    store_name: storeName,
-    store_chain: storeChain,
-    purchase_date: date.toISOString().split('T')[0],
-    total_amount: total,
-    receipt_image_url: null,
-    created_at: new Date().toISOString(),
+    userId: 'mock-user-id',
+    storeName: storeName,
+    storeChain: storeChain,
+    purchaseDate: date.toISOString().split('T')[0],
+    totalAmount: total,
+    receiptImageUrl: null,
+    createdAt: new Date().toISOString(),
   };
 
   const receiptItems: ReceiptItem[] = items.map((item, index) => ({
     id: generateId(),
-    receipt_id: receiptId,
-    product_name_raw: item.name,
-    normalized_product_id: null,
+    receiptId: receiptId,
+    productNameRaw: item.name,
+    normalizedProductId: null,
     price: item.price,
     quantity: item.quantity,
-    unit_price: item.price / item.quantity,
-    created_at: new Date().toISOString(),
+    unitPrice: item.price / item.quantity,
+    createdAt: new Date().toISOString(),
   }));
 
   return { receipt, receiptItems };
@@ -118,15 +118,15 @@ export function generateMockShoppingList(name: string, productIds: string[]): {
   const listId = generateId();
   const list: ShoppingList = {
     id: listId,
-    user_id: 'mock-user-id',
+    userId: 'mock-user-id',
     name,
-    created_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
   };
 
   const items: ShoppingListItem[] = productIds.map((productId) => ({
     id: generateId(),
-    list_id: listId,
-    product_id: productId,
+    listId: listId,
+    productId: productId,
     quantity: 1,
   }));
 

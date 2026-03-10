@@ -41,23 +41,23 @@ export default function ReceiptCard({ receipt, onPress }: ReceiptCardProps) {
           <View style={styles.header}>
             <View style={styles.storeInfo}>
               <MaterialCommunityIcons
-                name={getStoreIcon(receipt.store_chain)}
+                name={getStoreIcon(receipt.storeChain)}
                 size={24}
                 color={theme.colors.primary}
                 style={styles.icon}
               />
               <View style={styles.storeText}>
                 <Text variant="titleMedium" style={styles.storeName}>
-                  {receipt.store_name}
+                  {receipt.storeName}
                 </Text>
                 <Text variant="bodySmall" style={styles.storeChain}>
-                  {receipt.store_chain}
+                  {receipt.storeChain}
                 </Text>
               </View>
             </View>
             <View style={styles.amountContainer}>
               <Text variant="titleLarge" style={styles.amount}>
-                {formatCurrency(receipt.total_amount)}
+                {formatCurrency(receipt.totalAmount)}
               </Text>
             </View>
           </View>
@@ -70,7 +70,7 @@ export default function ReceiptCard({ receipt, onPress }: ReceiptCardProps) {
                 style={{ marginRight: 6 }}
               />
               <Text variant="bodySmall" style={styles.date}>
-                {formatDate(receipt.purchase_date)}
+                {formatDate(receipt.purchaseDate)}
               </Text>
             </View>
             <MaterialCommunityIcons

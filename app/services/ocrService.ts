@@ -29,11 +29,11 @@ class MockOCRService implements OCRService {
 
     // Mock receipt items
     const mockItems: ParsedReceiptItem[] = [
-      { name_raw: 'Melk 1L', price: 25.90, quantity: 1 },
-      { name_raw: 'Brød Loaf', price: 18.50, quantity: 1 },
-      { name_raw: 'Egg 12pk', price: 35.00, quantity: 1 },
-      { name_raw: 'Agurk', price: 12.90, quantity: 2 },
-      { name_raw: 'Tomat', price: 24.90, quantity: 1 },
+      { nameRaw: 'Melk 1L', price: 25.90, quantity: 1 },
+      { nameRaw: 'Brød Loaf', price: 18.50, quantity: 1 },
+      { nameRaw: 'Egg 12pk', price: 35.00, quantity: 1 },
+      { nameRaw: 'Agurk', price: 12.90, quantity: 2 },
+      { nameRaw: 'Tomat', price: 24.90, quantity: 1 },
     ];
 
     const total = mockItems.reduce((sum, item) => sum + item.price, 0);
