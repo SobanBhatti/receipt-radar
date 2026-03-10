@@ -25,13 +25,13 @@ export async function processAndSaveReceipt(
     // Step 2: Create receipt DTO for API
     const createReceiptDto: CreateReceiptDto = {
       storeName: parsedReceipt.store,
-      storeChain: extractStoreChain(parsedReceipt.store),
+      storeChain: extractStoreChain(parsedReceipt.store), // Backend will improve this match
       purchaseDate: parsedReceipt.date.toISOString(),
       totalAmount: parsedReceipt.total,
-      receiptImageUrl: image.uri, // In production, this would be uploaded to cloud storage first
+      receiptImageUrl: null, // Not storing images for now
       items: parsedReceipt.items.map((item) => ({
         productNameRaw: item.nameRaw,
-        normalizedProductId: null, // Will be set when product normalization is implemented
+        normalizedProductId: null, // Backend will match or create products
         price: item.price,
         quantity: item.quantity,
         unitPrice: item.price / item.quantity,
